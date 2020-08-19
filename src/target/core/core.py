@@ -34,17 +34,9 @@ def panic(code: int) -> None:
 
 def machine_new(vars: int, capacity: int) -> Machine:
 	'''Create new virtual Machine'''
-
 	result = Machine(capacity)
-	
-	#initialize the memory and allocated arrays
-	for i in range(capacity):
-		result.memory[i] = 0
-		result.allocated[i] = False
-
-	for i in range(vars):
-		machine_push(result, 0)
-
+	for _ in range(vars):
+		machine_push(result, 0.0)
 	return result
 
 def machine_dump(vm: Machine) -> None:
