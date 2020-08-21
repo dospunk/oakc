@@ -4,6 +4,8 @@ mod go;
 pub use go::Go;
 mod ts;
 pub use ts::TS;
+mod py;
+pub use py::Python;
 
 pub trait Target {
     fn get_name(&self) -> char;
@@ -38,7 +40,7 @@ pub trait Target {
     fn call_foreign_fn(&self, name: String) -> String;
 
     fn begin_while(&self) -> String;
-    fn end_while(&self) -> String;
+	fn end_while(&self) -> String;
 
     fn compile(&self, code: String) -> std::io::Result<()>;
 }
