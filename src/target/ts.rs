@@ -110,11 +110,11 @@ impl Target for TS {
         format!("await {}(vm);\n", name)
     }
 
-    fn begin_while(&self) -> String {
+    fn begin_while(&mut self) -> String {
         String::from("while (machine_pop(vm)) {\n")
     }
 
-    fn end_while(&self) -> String {
+    fn end_while(&mut self) -> String {
         String::from("}\n")
     }
 

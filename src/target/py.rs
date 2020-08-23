@@ -127,15 +127,15 @@ impl Target for Python {
         format!("{}{}(vm)\n", indent!(self), name)
     }
 
-    fn begin_while(&self) -> String {
+    fn begin_while(&mut self) -> String {
 		let out = format!("{}while (machine_pop(vm)):\n", indent!(self));
-		self.increment_indent_level();
+		self.indentLevel += 1;
 		out
     }
 
-    fn end_while(&self) -> String {
+    fn end_while(&mut self) -> String {
 		let out = format!("{}\n", indent!(self));
-		self.decrement_indent_level();
+		self.indentLevel -= 1;
 		out
     }
 
