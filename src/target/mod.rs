@@ -4,6 +4,8 @@ mod go;
 pub use go::Go;
 mod ts;
 pub use ts::TS;
+mod lua;
+pub use lua::Lua;
 
 pub trait Target {
     fn get_name(&self) -> char;
