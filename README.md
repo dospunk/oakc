@@ -199,3 +199,6 @@ main.exe
 
 **TypeScript backend**
 	- TypeScript 3.9 compiler
+
+**Lua backend**
+    - Lua 5.4 or later
