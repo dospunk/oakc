@@ -1,21 +1,15 @@
---[[typedef struct machine {
-    double* memory
-    bool*   allocated
-    int     capacity
-    int     stack_ptr
-    int     base_ptr
-} machine
-]]--
+--- the core functions for Oak
+-- @module core
 
-
------------------------------------------------------------------------
------------------------------ Error codes -----------------------------
------------------------------------------------------------------------
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+-- -- -- -- -- -- -- -- -- -- Error codes -- -- -- -- -- -- -- -- -- --
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 local const STACK_HEAP_COLLISION = 1
 local const NO_FREE_MEMORY       = 2
 local const STACK_UNDERFLOW      = 3
 
--- Fatal error handler. Always exits program.
+--- Fatal error handler. Always exits program.
+-- @param code the error code
 function panic(code)
     io.write("panic: ")
     if     code==STACK_HEAP_COLLISION then io.write("stack and heap collision during push")
@@ -27,10 +21,11 @@ function panic(code)
     os.exit(code)
 end
 
------------------------------------------------------------------------
------------------------------ Debug Info ------------------------------
------------------------------------------------------------------------
--- Print out the state of the virtual machine's stack and heap
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+-- -- -- -- -- -- -- -- -- -- Debug Info -- -- -- -- -- -- -- -- -- --
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+--- Print out the state of the virtual machine's stack and heap
+-- @param vm the machine to dump
 function machine_dump(vm)
     io.write("stack: [ ")
     for i = 0, vm.stack_ptr-1 do
@@ -62,10 +57,12 @@ function machine_dump(vm)
 end
 
 
--------------------------------------------------------------------------
---------------------- Stack manipulation operations ---------------------
--------------------------------------------------------------------------
--- Push a number onto the stack
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+-- -- -- -- -- -- -- Stack manipulation operations -- -- -- -- -- -- --
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+--- Push a number onto the stack
+-- @param vm the machine to push to
+-- @param n the number to push
 function machine_push(vm, n)
     -- If the memory at the stack pointer is allocated on the heap,
     -- then the stack pointer has collided with the heap.
@@ -80,7 +77,8 @@ function machine_push(vm, n)
     vm.stack_ptr = vm.stack_ptr + 1
 end
 
--- Pop a number from the stack
+--- Pop a number from the stack
+-- @param vm the machine to pop from
 function machine_pop(vm)
     -- If the stack pointer can't decrement any further,
     -- the stack has underflowed.
@@ -100,10 +98,10 @@ function machine_pop(vm)
     return result
 end
 
-------------------------------------------------------------------------
----------------------- Constructor and destructor ----------------------
-------------------------------------------------------------------------
--- Create new virtual machine
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+-- -- -- -- -- -- -- Constructor and destructor -- -- -- -- -- -- -- --
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+--- Create new virtual machine
 function machine_new(global_scope_size, capacity)
     local result = {}
     result.capacity  = capacity
@@ -125,25 +123,27 @@ function machine_new(global_scope_size, capacity)
     return result
 end
 
--- Free the virtual machine's memory. This is called at the end of the program.
--- lua has automatic memory management
+--- Free the virtual machine's memory. This is called at the end of the program.
+-- lua has automatic memory management so this does nothing
+-- @param vm the machine to free
 function machine_drop(vm)
     -- machine_dump(vm)
     -- free(vm.memory)
     -- free(vm.allocated)
 end
 
-------------------------------------------------------------------------
----------------------- Function memory management ----------------------
-------------------------------------------------------------------------
--- Push the base pointer onto the stack
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+-- -- -- -- -- -- -- Function memory management -- -- -- -- -- -- -- --
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+--- Push the base pointer onto the stack
+-- @param vm the machine to 
 function machine_load_base_ptr(vm)
     -- Get the virtual machine's current base pointer value,
     -- and push it onto the stack.
     machine_push(vm, vm.base_ptr)
 end
 
--- Establish a new stack frame for a function with `arg_size`
+--- Establish a new stack frame for a function with `arg_size`
 -- number of cells as arguments.
 function machine_establish_stack_frame(vm, arg_size, local_scope_size)
     -- Allocate some space to store the arguments' cells for later
@@ -176,7 +176,7 @@ function machine_establish_stack_frame(vm, arg_size, local_scope_size)
     -- free(args)
 end
 
--- End a stack frame for a function with `return_size` number of cells
+--- End a stack frame for a function with `return_size` number of cells
 -- to return, and resume the parent stack frame.
 function machine_end_stack_frame(vm, return_size, local_scope_size)
     -- Allocate some space to store the returned cells for later
@@ -206,10 +206,10 @@ function machine_end_stack_frame(vm, return_size, local_scope_size)
 end
 
 
--------------------------------------------------------------------------
---------------------- Pointer and memory operations ---------------------
--------------------------------------------------------------------------
--- Pop the `size` parameter off of the stack, and return a pointer to `size` number of free cells.
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+-- -- -- -- -- -- -- Pointer and memory operations -- -- -- -- -- -- --
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+--- Pop the `size` parameter off of the stack, and return a pointer to `size` number of free cells.
 function machine_allocate(vm)    
     -- Get the size of the memory to allocate on the heap
     local size = machine_pop(vm)
@@ -253,7 +253,7 @@ function machine_allocate(vm)
     return addr
 end
 
--- Pop the `address` and `size` parameters off of the stack, and free the memory at `address` with size `size`.
+--- Pop the `address` and `size` parameters off of the stack, and free the memory at `address` with size `size`.
 function machine_free(vm)
     -- Get the address and size to free from the stack
     local addr = machine_pop(vm)
@@ -266,7 +266,7 @@ function machine_free(vm)
     end
 end
 
--- Pop an `address` parameter off of the stack, and a `value` parameter with size `size`.
+--- Pop an `address` parameter off of the stack, and a `value` parameter with size `size`.
 -- Then store the `value` parameter at the memory address `address`.
 function machine_store(vm, size)
     -- Pop an address off of the stack
@@ -280,7 +280,7 @@ function machine_store(vm, size)
     end
 end
 
--- Pop an `address` parameter off of the stack, and push the value at `address` with size `size` onto the stack.
+--- Pop an `address` parameter off of the stack, and push the value at `address` with size `size` onto the stack.
 function machine_load(vm, size)
     local addr = machine_pop(vm)
     for i = 0, size-1 do
@@ -288,24 +288,24 @@ function machine_load(vm, size)
     end
 end
 
--- Add the topmost numbers on the stack
+--- Add the topmost numbers on the stack
 function machine_add(vm)
     machine_push(vm, machine_pop(vm) + machine_pop(vm))
 end
 
--- Subtract the topmost number on the stack from the second topmost number on the stack
+--- Subtract the topmost number on the stack from the second topmost number on the stack
 function machine_subtract(vm)
     local b = machine_pop(vm)
     local a = machine_pop(vm)
     machine_push(vm, a-b)
 end
 
--- Multiply the topmost numbers on the stack
+--- Multiply the topmost numbers on the stack
 function machine_multiply(vm)
     machine_push(vm, machine_pop(vm) * machine_pop(vm))
 end
 
--- Divide the second topmost number on the stack by the topmost number on the stack
+--- Divide the second topmost number on the stack by the topmost number on the stack
 function machine_divide(vm)
     local b = machine_pop(vm)
     local a = machine_pop(vm)
