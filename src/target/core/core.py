@@ -111,7 +111,7 @@ def machine_end_stack_frame(vm: Machine, return_size: int, local_scope_size: int
         machine_pop(vm)
     
     # Retrieve the parent function's base pointer to resume the function
-    vm.base_ptr = machine_pop(vm)
+    vm.base_ptr = int(machine_pop(vm))
 
     # Finally, push the returned value back onto the stack for use by
     # the parent function.
@@ -154,7 +154,7 @@ def machine_allocate(vm: Machine) -> int:
 	if addr <= vm.stack_ptr:
 		panic(NO_FREE_MEMORY)
 	
-	for i in range(size):
+	for i in range(int(size)):
 		vm.allocated[addr+i] = True
 
 	machine_push(vm, addr)
@@ -165,10 +165,10 @@ def machine_free(vm: Machine) -> None:
 	Pop the `address` and `size` parameters off of the stack, and free the memory at
 	`address` with size `size`.
 	'''
-	addr = machine_pop(vm)
+	addr = int(machine_pop(vm))
 	size = machine_pop(vm)
 
-	for i in range(size):
+	for i in range(int(size)):
 		vm.allocated[addr+i] = False
 		vm.memory[addr+i] = 0
 
@@ -177,7 +177,7 @@ def machine_store(vm: Machine, size: int) -> None:
 	Pop an `address` parameter off of the stack, and a `value` parameter with size `size`.
 	Then store the `value` parameter at the memory address `address`.
 	'''
-	addr = machine_pop(vm)
+	addr = int(machine_pop(vm))
 	for i in reversed(range(size)):
 		vm.memory[addr+i] = machine_pop(vm)
 
@@ -186,7 +186,7 @@ def machine_load(vm: Machine, size: int) -> None:
 	Pop an `address` parameter off of the stack, and push the value at `address` with size
 	`size` onto the stack.
 	'''
-	addr = machine_pop(vm)
+	addr = int(machine_pop(vm))
 	for i in range(size):
 		machine_push(vm, vm.memory[addr+i])
 

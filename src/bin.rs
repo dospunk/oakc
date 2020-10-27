@@ -52,7 +52,7 @@ fn main() {
                 } else if matches.is_present("ts") {
                     compile(&cwd, contents, TS)
                 } else if matches.is_present("py") {
-					compile(&cwd, contents, Python{..Default::default()})
+					compile(&cwd, contents, Python)
 				} else {
                     compile(&cwd, contents, C)
                 };

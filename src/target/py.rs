@@ -7,20 +7,12 @@ use std::{
 	mem,
 };
 
-pub struct Python {
-	pub indentLevel: usize
-}
+pub struct Python;
 
-impl Default for Python {
-	fn default() -> Python {
-		Python {
-			indentLevel: 1
-		}
-	}
-}
+static mut indentLevel: usize = 1;
 
 macro_rules! indent {
-	($sel:ident) => (std::iter::repeat("    ").take($sel.indentLevel).collect::<String>())
+	() => (std::iter::repeat("    ").take(unsafe {indentLevel}).collect::<String>())
 }
 
 impl Target for Python {
@@ -43,72 +35,72 @@ impl Target for Python {
     fn begin_entry_point(&self, global_scope_size: i32, memory_size: i32) -> String {
         format!(
 			"def main():\n{}vm = machine_new({}, {})\n",
-			indent!(self),
+			indent!(),
             global_scope_size,
             global_scope_size + memory_size,
         )
     }
 
     fn end_entry_point(&self) -> String {
-        format!("\n{}machine_drop(vm)\n", indent!(self))
+        format!("\n{}machine_drop(vm)\n\nif __name__ == \"__main__\":\n{}main()", indent!(), indent!())
     }
 
     fn establish_stack_frame(&self, arg_size: i32, local_scope_size: i32) -> String {
         format!(
             "{}machine_establish_stack_frame(vm, {}, {})\n",
-             indent!(self), arg_size, local_scope_size
-        )
+             indent!(), arg_size, local_scope_size
+        ) 
     }
 
     fn end_stack_frame(&self, return_size: i32, local_scope_size: i32) -> String {
         format!(
             "{}machine_end_stack_frame(vm, {}, {})\n",
-            indent!(self), return_size, local_scope_size
+            indent!(), return_size, local_scope_size
         )
     }
 
     fn load_base_ptr(&self) -> String {
-        format!("{}machine_load_base_ptr(vm)\n", indent!(self))
+        format!("{}machine_load_base_ptr(vm)\n", indent!())
     }
 
     fn push(&self, n: f64) -> String {
-        format!("{}machine_push(vm, {})\n", indent!(self), n)
+        format!("{}machine_push(vm, {})\n", indent!(), n)
     }
 
     fn add(&self) -> String {
-        format!("{}machine_add(vm)\n", indent!(self))
+        format!("{}machine_add(vm)\n", indent!())
     }
 
     fn subtract(&self) -> String {
-        format!("{}machine_subtract(vm)\n", indent!(self))
+        format!("{}machine_subtract(vm)\n", indent!())
     }
 
     fn multiply(&self) -> String {
-        format!("{}machine_multiply(vm)\n", indent!(self))
+        format!("{}machine_multiply(vm)\n", indent!())
     }
 
     fn divide(&self) -> String {
-        format!("{}machine_divide(vm)\n", indent!(self))
+        format!("{}machine_divide(vm)\n", indent!())
     }
 
     fn sign(&self) -> String {
-        format!("{}machine_sign(vm)\n", indent!(self))
+        format!("{}machine_sign(vm)\n", indent!())
     }
 
     fn allocate(&self) -> String {
-        format!("{}machine_allocate(vm)\n", indent!(self))
+        format!("{}machine_allocate(vm)\n", indent!())
     }
 
     fn free(&self) -> String {
-        format!("{}machine_free(vm)\n", indent!(self))
+        format!("{}machine_free(vm)\n", indent!())
     }
 
     fn store(&self, size: i32) -> String {
-        format!("{}machine_store(vm, {})\n", indent!(self), size)
+        format!("{}machine_store(vm, {})\n", indent!(), size)
     }
 
     fn load(&self, size: i32) -> String {
-        format!("{}machine_load(vm, {})\n", indent!(self), size)
+        format!("{}machine_load(vm, {})\n", indent!(), size)
     }
 
     fn fn_header(&self, name: String) -> String {
@@ -120,22 +112,22 @@ impl Target for Python {
     }
 
     fn call_fn(&self, name: String) -> String {
-        format!("{}{}(vm)\n", indent!(self), name)
+        format!("{}{}(vm)\n", indent!(), name)
     }
 
     fn call_foreign_fn(&self, name: String) -> String {
-        format!("{}{}(vm)\n", indent!(self), name)
+        format!("{}{}(vm)\n", indent!(), name)
     }
 
-    fn begin_while(&mut self) -> String {
-		let out = format!("{}while (machine_pop(vm)):\n", indent!(self));
-		self.indentLevel += 1;
+    fn begin_while(&self) -> String {
+		let out = format!("{}while (machine_pop(vm)):\n", indent!());
+		unsafe {indentLevel += 1;}
 		out
     }
 
-    fn end_while(&mut self) -> String {
-		let out = format!("{}\n", indent!(self));
-		self.indentLevel -= 1;
+    fn end_while(&self) -> String {
+		let out = format!("{}\n", indent!());
+		unsafe {indentLevel -= 1;}
 		out
     }
 
