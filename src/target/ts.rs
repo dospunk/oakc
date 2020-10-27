@@ -12,6 +12,10 @@ impl Target for TS {
         't'
     }
 
+    fn is_standard(&self) -> bool {
+        true
+    }
+
     fn std(&self) -> String {
         String::from(include_str!("std/std.ts"))
     }
@@ -99,7 +103,7 @@ impl Target for TS {
     }
 
     fn fn_definition(&self, name: String, body: String) -> String {
-        format!("async function {}(vm: machine): void {{ {}}}\n", name, body)
+        format!("async function {}(vm: machine): Promise<void> {{ {}}}\n", name, body)
     }
 
     fn call_fn(&self, name: String) -> String {
@@ -126,6 +130,7 @@ impl Target for TS {
                 .arg("main.js")
                 .arg("--target")
                 .arg("ES2017")
+                .arg("--removeComments")
                 .output()
             {
                 if let Ok(_) = remove_file("OUTPUT.ts") {
