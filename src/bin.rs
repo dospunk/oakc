@@ -50,11 +50,11 @@ fn main() {
                 } else if matches.is_present("go") {
                     compile(&cwd, &input_file, contents, Go)
                 } else if matches.is_present("ts") {
-                    compile(&cwd, contents, TS)
+                    compile(&cwd, &input_file, contents, TS)
                 } else if matches.is_present("py") {
-					compile(&cwd, contents, Python)
+					compile(&cwd, &input_file, contents, Python)
 				} else {
-                    compile(&cwd, contents, C)
+                    compile(&cwd, &input_file, contents, C)
                 };
 
                 match compile_result {
