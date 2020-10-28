@@ -38,21 +38,21 @@ def pad_list(arr: List[str], new_len: int) -> List[str]:
 	return out
 
 def print_diff(base: bytes, test: bytes, title: str) -> None:
-	base = base.decode("utf8")
-	test = test.decode("utf8")
+	base_str = base.decode("utf8")
+	test_str = test.decode("utf8")
 	base_lines = ["C "+title, "=========="]
-	base_lines.extend(base.split("\n"))
+	base_lines.extend(base_str.split("\n"))
 	test_lines = ["Test "+title, "=========="]
-	test_lines.extend(test.split("\n"))
+	test_lines.extend(test_str.split("\n"))
 	list_len = max(len(base_lines), len(test_lines))
 	base_lines = pad_lines(pad_list(base_lines, list_len))
 	test_lines = pad_lines(pad_list(test_lines, list_len))
 	arrow_pos = ["     "]*list_len
 	
-	for i,s in enumerate(difflib.ndiff(base, test)):
+	for i,s in enumerate(difflib.ndiff(base_str, test_str)):
 		if s[0]==' ': continue
 		elif s[0]=='-' or s[0]=='+':
-			arrow_pos[base[:i].count("\n")+2] = " =/= "
+			arrow_pos[base_str[:i].count("\n")+2] = " =/= "
 	for i in range(0, list_len):
 		if i < len(base_lines) and i < len(arrow_pos) and i < len(test_lines):
 			print("| "+base_lines[i]+" | "+arrow_pos[i]+" | "+test_lines[i]+" |")
